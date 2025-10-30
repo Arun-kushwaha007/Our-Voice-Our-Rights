@@ -11,4 +11,4 @@
 /client/.env
 /server/.env
 
-/server/dist
+/server/dist/
