@@ -1,20 +1,32 @@
-import { fetchDataForState } from "../services/mgnregaService";
-import { upsertDistrictSnapshot } from "../services/districtService";
-import { parseRawData } from "../utils/dataParser";
-import { logger } from "../utils/logger";
+import { fetchMGNREGAData } from "../services/mgnregaService";
+import District from "../models/District";
+import { connectDB } from "../config/db";
 
-export const runETLForState = async (state: string) => {
-  logger.info(`Starting ETL for state: ${state}`);
-  try {
-    const rawData = await fetchDataForState(state);
-    const snapshots = parseRawData(rawData);
+const updateDistrictData = async () => {
+    await connectDB();
+    const records = await fetchMGNREGAData();
 
-    for (const snap of snapshots) {
-      await upsertDistrictSnapshot(snap);
+    if (records.length > 0) {
+        for (const record of records) {
+            const filter = { code: record.district_code };
+
+            // Performance index calculation (example)
+            const personDaysProvided = parseFloat(record.total_person_days_of_work_provided_against_person_days_demanded);
+            const avgDaysEmployment = parseFloat(record.average_days_of_employment_provided_per_household);
+            const performanceIndex = (personDaysProvided * 0.6) + (avgDaysEmployment * 0.4);
+
+            const update = {
+                name: record.district,
+                state: record.state,
+                performanceIndex: parseFloat(performanceIndex.toFixed(2)),
+                lastUpdated: new Date()
+            };
+            await District.findOneAndUpdate(filter, update, { upsert: true, new: true });
+        }
     }
 
-    logger.info(`ETL completed for state: ${state}. ${snapshots.length} snapshots processed.`);
-  } catch (error) {
-    logger.error(`ETL failed for state ${state}:`, error);
-  }
+    console.log("District data updated successfully.");
+    process.exit(0);
 };
+
+updateDistrictData();

@@ -1,20 +1,12 @@
 import axios from "axios";
-import { API_KEY } from "../config/env";
-import { logger } from "../utils/logger";
+import { MGNREGA_BASE_URL, MGNREGA_API_KEY } from "../config/env";
 
-const API_BASE_URL = "https://api.data.gov.in/resource";
-
-export const fetchDataForState = async (state: string) => {
- 
-  const resourceId = "your_resource_id_here"; 
-  const url = `${API_BASE_URL}/${resourceId}?api-key=${API_KEY}&format=json&filters[state_name]=${state}`;
-
-  try {
-    const response = await axios.get(url);
-    logger.info(`Fetched data for state: ${state}`);
-    return response.data.records;
-  } catch (error) {
-    logger.error(`Error fetching data for state ${state}:`, error);
-    throw error;
-  }
+export const fetchMGNREGAData = async () => {
+    try {
+        const response = await axios.get(`${MGNREGA_BASE_URL}?api-key=${MGNREGA_API_KEY}&format=json&offset=0&limit=100`);
+        return response.data.records;
+    } catch (error) {
+        console.error("Error fetching MGNREGA data:", error);
+        return [];
+    }
 };

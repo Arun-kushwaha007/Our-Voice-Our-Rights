@@ -1,18 +1,15 @@
-import winston from "winston";
-import { NODE_ENV } from "../config/env";
+const getTimestamp = (): string => {
+    return new Date().toISOString();
+};
 
-const { combine, timestamp, printf, colorize } = winston.format;
-
-const logFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp} ${level}: ${message}`;
-});
-
-export const logger = winston.createLogger({
-  level: NODE_ENV === "development" ? "debug" : "info",
-  format: combine(
-    colorize(),
-    timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    logFormat
-  ),
-  transports: [new winston.transports.Console()],
-});
+export const logger = {
+    info: (message: string) => {
+        console.log(`[${getTimestamp()}] [INFO] ${message}`);
+    },
+    error: (message: string, error?: any) => {
+        console.error(`[${getTimestamp()}] [ERROR] ${message}`, error);
+    },
+    warn: (message: string) => {
+        console.warn(`[${getTimestamp()}] [WARN] ${message}`);
+    }
+};

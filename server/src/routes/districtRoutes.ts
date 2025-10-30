@@ -10,6 +10,7 @@ import { asyncHandler } from "../middleware/asyncHandler";
 
 const router = Router();
 
+// Specific routes must be defined before dynamic routes
 router.get("/", listDistricts);
 router.get("/by-location", asyncHandler(async (req, res) => {
     const { lat, lon } = req.query;

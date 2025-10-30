@@ -1,29 +1,23 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import * as districtService from "../services/districtService";
-import * as cacheService from "../services/cacheService";
+import District from "../models/District";
 
-/**
- * GET /api/compare?d1=ID1&d2=ID2
- */
+// @desc    Compare two districts
+// @route   POST /api/compare
+// @access  Public
 export const compareDistricts = asyncHandler(async (req: Request, res: Response) => {
-  const { d1, d2 } = req.query as { d1: string; d2: string };
-  if (!d1 || !d2) {
-    return res.status(400).json({ message: "Provide both d1 and d2 query params" });
-  }
+    const { district1, district2 } = req.body;
 
-  const cacheKey = `compare:${d1}:${d2}`;
-  let comparison = await cacheService.getCache(cacheKey);
+    const d1 = await District.findById(district1);
+    const d2 = await District.findById(district2);
 
-  if (!comparison) {
-    const a = await districtService.getLatestSummary(d1);
-    const b = await districtService.getLatestSummary(d2);
-    if (!a || !b) {
-      return res.status(404).json({ message: "Data not found for one or both districts" });
+    if (d1 && d2) {
+        res.json({
+            [d1.name]: d1.performanceIndex,
+            [d2.name]: d2.performanceIndex,
+        });
+    } else {
+        res.status(404);
+        throw new Error("One or both districts not found");
     }
-    comparison = { a, b };
-    await cacheService.setCache(cacheKey, comparison, 3600); // Cache for 1 hour
-  }
-
-  res.json(comparison);
 });
