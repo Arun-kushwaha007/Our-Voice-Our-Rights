@@ -11,8 +11,28 @@ import { upsertDistrictSnapshot } from "../services/districtService";
 import { logger } from "../utils/logger";
 
 /* Example normalization function (adapt to real data structure) */
-const normalizeRecord = (rec: any) => {
-  // Example assumes rec has district_code, district_name, year, month, beneficiaries, funds_released, days_worked
+const normalizeRecord = (import { fetchDataForState } from "../services/mgnregaService";
+import { upsertDistrictSnapshot } from "../services/districtService";
+import { parseRawData } from "../utils/dataParser";
+import { logger } from "../utils/logger";
+
+export const runETLForState = async (state: string) => {
+  logger.info(`Starting ETL for state: ${state}`);
+  try {
+    const rawData = await fetchDataForState(state);
+    const snapshots = parseRawData(rawData);
+
+    for (const snap of snapshots) {
+      await upsertDistrictSnapshot(snap);
+    }
+
+    logger.info(`ETL completed for state: ${state}. ${snapshots.length} snapshots processed.`);
+  } catch (error) {
+    logger.error(`ETL failed for state ${state}:`, error);
+  }
+};
+rec: any) => {
+  
   return {
     state: rec.state_name || rec.state || "Unknown",
     districtId: String(rec.district_code || rec.district_id || rec.district),

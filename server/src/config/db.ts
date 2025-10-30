@@ -4,15 +4,10 @@ import { logger } from "../utils/logger";
 
 export const connectDB = async () => {
   try {
-    if (!MONGO_URI) {
-      throw new Error("MONGO_URI not set in env");
-    }
-    await mongoose.connect(MONGO_URI, {
-      // options are automatically set in modern drivers
-    });
+    await mongoose.connect(MONGO_URI);
     logger.info("MongoDB connected");
-  } catch (err) {
-    logger.error("MongoDB connection error", err);
+  } catch (err: any) {
+    logger.error(`MongoDB connection error: ${err.message}`);
     process.exit(1);
   }
 };

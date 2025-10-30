@@ -1,4 +1,4 @@
-import DistrictSnapshot, { IDistrictSnapshot } from "../models/DistrictSnapshot";
+import DistrictSnapshot, { IDistrictSnapshot } from "../models/District";
 import { logger } from "../utils/logger";
 
 /**

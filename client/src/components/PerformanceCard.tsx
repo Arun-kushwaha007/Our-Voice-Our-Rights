@@ -1,48 +1,63 @@
 import React from "react";
-import TrendChart from "./TrendChart";
+import { useTranslation } from "react-i18next";
+import type { IDistrictSnapshot } from "../../../server/src/models/District";
+import { PERFORMANCE_THRESHOLDS } from "../utils/constants";
 
-export default function PerformanceCard({ summary }: any) {
-  const latest = summary.latest;
-  const trend = summary.trend?.map((t: any) => ({
-    label: `${t.month}/${t.year}`,
-    value: t.metrics?.fundsReleased || 0
-  })).reverse();
+interface PerformanceCardProps {
+  summary: {
+    latest: IDistrictSnapshot;
+  };
+}
+
+const getPerformanceLevel = (metric: keyof typeof PERFORMANCE_THRESHOLDS, value: number) => {
+  if (value >= PERFORMANCE_THRESHOLDS[metric].good) return "good";
+  if (value <= PERFORMANCE_THRESHOLDS[metric].poor) return "poor";
+  return "needsImprovement";
+};
+
+const PerformanceCard: React.FC<PerformanceCardProps> = ({ summary }) => {
+  const { t } = useTranslation();
+  const { metrics } = summary.latest;
+
+  const performanceData = [
+    { label: "beneficiaries", value: metrics.beneficiaries },
+    { label: "fundsReleased", value: metrics.fundsReleased },
+    { label: "daysWorked", value: metrics.daysWorked },
+    { label: "paymentsOnTime", value: metrics.paymentsOnTimePct || 0 },
+  ];
 
   return (
-    <div className="mt-6 p-4 border rounded shadow-sm bg-white">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold">{latest.districtName}</h2>
-          <div className="text-sm text-gray-500">{latest.state}</div>
-        </div>
-        <div className="text-sm text-gray-600">
-          Last updated: {new Date(latest.fetchedAt).toLocaleDateString()}
-        </div>
+    <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="px-4 py-5 sm:px-6">
+        <h3 className="text-lg leading-6 font-medium text-gray-900">{t("performanceSummary")}</h3>
       </div>
-
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div className="p-3 border rounded">
-          <div className="text-sm text-gray-500">Beneficiaries</div>
-          <div className="text-2xl font-bold">{latest.metrics.beneficiaries}</div>
-        </div>
-        <div className="p-3 border rounded">
-          <div className="text-sm text-gray-500">Person-days</div>
-          <div className="text-2xl font-bold">{latest.metrics.daysWorked}</div>
-        </div>
-        <div className="p-3 border rounded">
-          <div className="text-sm text-gray-500">Funds Released</div>
-          <div className="text-2xl font-bold">{latest.metrics.fundsReleased}</div>
-        </div>
-        <div className="p-3 border rounded">
-          <div className="text-sm text-gray-500">Payments on time</div>
-          <div className="text-2xl font-bold">{latest.metrics.paymentsOnTimePct || 0}%</div>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="text-sm text-gray-600 mb-2">12-month trend (Funds Released)</h3>
-        <TrendChart data={trend} />
+      <div className="border-t border-gray-200">
+        <dl>
+          {performanceData.map(({ label, value }) => {
+            const level = getPerformanceLevel(label as keyof typeof PERFORMANCE_THRESHOLDS, value);
+            return (
+              <div
+                key={label}
+                className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+              >
+                <dt className="text-sm font-medium text-gray-500">{t(label)}</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {value}
+                  <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    level === "good" ? "bg-green-100 text-green-800" :
+                    level === "poor" ? "bg-red-100 text-red-800" :
+                    "bg-yellow-100 text-yellow-800"
+                  }`}>
+                    {t(level)}
+                  </span>
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
       </div>
     </div>
   );
-}
+};
+
+export default PerformanceCard;

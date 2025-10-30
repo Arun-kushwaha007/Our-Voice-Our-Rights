@@ -1,8 +1,22 @@
 {
-  "select_district": "Select District",
-  "beneficiaries": "Beneficiaries",
-  "days_worked": "Person-days",
-  "funds_released": "Funds Released",
-  "payments_on_time": "Payments on time",
-  "last_updated": "Last updated"
+  "translation": {
+    "appTitle": "Our Voice — MGNREGA District Dashboard",
+    "selectDistrict": "Select a district to view summary",
+    "performanceSummary": "Performance Summary",
+    "beneficiaries": "Beneficiaries",
+    "fundsReleased": "Funds Released (Cr)",
+    "daysWorked": "Person-Days Worked",
+    "paymentsOnTime": "Payments on Time (%)",
+    "trend": "12-Month Trend",
+    "compareDistricts": "Compare Districts",
+    "selectDistrict1": "Select District 1",
+    "selectDistrict2": "Select District 2",
+    "compare": "Compare",
+    "loading": "Loading...",
+    "error": "An error occurred.",
+    "good": "Good",
+    "needsImprovement": "Needs Improvement",
+    "poor": "Poor",
+    "speakSummary": "Speak Summary"
+  }
 }

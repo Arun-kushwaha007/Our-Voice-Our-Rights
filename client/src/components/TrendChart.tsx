@@ -1,33 +1,51 @@
-import React, { useEffect, useRef } from "react";
-import Chart from "chart.js/auto";
+import React from "react";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import type { IDistrictSnapshot } from "../../../server/src/models/District";
 
-type TrendPoint = { label: string; value: number };
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-export default function TrendChart({ data }: { data: TrendPoint[] }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  useEffect(() => {
-    if (!canvasRef.current || !data) return;
-    const ctx = canvasRef.current.getContext("2d")!;
-    const chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: data.map((d) => d.label),
-        datasets: [
-          {
-            label: "Funds",
-            data: data.map((d) => d.value),
-            tension: 0.3,
-            fill: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } }
-      }
-    });
-    return () => chart.destroy();
-  }, [data]);
-
-  return <canvas ref={canvasRef} style={{ width: "100%", height: 140 }} />;
+interface TrendChartProps {
+  trendData: IDistrictSnapshot[];
 }
+
+const TrendChart: React.FC<TrendChartProps> = ({ trendData }) => {
+  const data = {
+    labels: trendData.map((d) => `${d.month}/${d.year}`).reverse(),
+    datasets: [
+      {
+        label: "Beneficiaries",
+        data: trendData.map((d) => d.metrics.beneficiaries).reverse(),
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.5)",
+      },
+      {
+        label: "Funds Released (Cr)",
+        data: trendData.map((d) => d.metrics.fundsReleased).reverse(),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
+
+  return <Line data={data} />;
+};
+
+export default TrendChart;

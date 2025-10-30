@@ -1,8 +1,22 @@
 {
-  "select_district": "जिला चुनें",
-  "beneficiaries": "लाभार्थी",
-  "days_worked": "व्यक्ति-दिन",
-  "funds_released": "राशि जारी",
-  "payments_on_time": "समय पर भुगतान",
-  "last_updated": "अंतिम अद्यतन"
+  "translation": {
+    "appTitle": "हमारी आवाज — मनरेगा जिला डैशबोर्ड",
+    "selectDistrict": "सारांश देखने के लिए एक जिला चुनें",
+    "performanceSummary": "प्रदर्शन सारांश",
+    "beneficiaries": "लाभार्थी",
+    "fundsReleased": "जारी की गई धनराशि (करोड़)",
+    "daysWorked": "व्यक्ति-दिवस काम किया",
+    "paymentsOnTime": "समय पर भुगतान (%)",
+    "trend": "12-माह की प्रवृत्ति",
+    "compareDistricts": "जिलों की तुलना करें",
+    "selectDistrict1": "जिला 1 चुनें",
+    "selectDistrict2": "जिला 2 चुनें",
+    "compare": "तुलना करें",
+    "loading": "लोड हो रहा है...",
+    "error": "एक त्रुटि हुई।",
+    "good": "अच्छा",
+    "needsImprovement": "सुधार की जरूरत है",
+    "poor": "खराब",
+    "speakSummary": "सारांश बोलें"
+  }
 }

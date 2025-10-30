@@ -1,9 +1,16 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "./logger";
+import { NODE_ENV } from "../config/env";
 
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({
-    message: err.message || "Internal Server Error"
+  logger.error(err.stack);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  res.status(statusCode).json({
+    success: false,
+    message,
+    stack: NODE_ENV === "development" ? err.stack : undefined,
   });
 };
