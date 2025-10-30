@@ -11,28 +11,7 @@ import { upsertDistrictSnapshot } from "../services/districtService";
 import { logger } from "../utils/logger";
 
 /* Example normalization function (adapt to real data structure) */
-const normalizeRecord = (import { fetchDataForState } from "../services/mgnregaService";
-import { upsertDistrictSnapshot } from "../services/districtService";
-import { parseRawData } from "../utils/dataParser";
-import { logger } from "../utils/logger";
-
-export const runETLForState = async (state: string) => {
-  logger.info(`Starting ETL for state: ${state}`);
-  try {
-    const rawData = await fetchDataForState(state);
-    const snapshots = parseRawData(rawData);
-
-    for (const snap of snapshots) {
-      await upsertDistrictSnapshot(snap);
-    }
-
-    logger.info(`ETL completed for state: ${state}. ${snapshots.length} snapshots processed.`);
-  } catch (error) {
-    logger.error(`ETL failed for state ${state}:`, error);
-  }
-};
-rec: any) => {
-  
+const normalizeRecord = (rec: any) => {
   return {
     state: rec.state_name || rec.state || "Unknown",
     districtId: String(rec.district_code || rec.district_id || rec.district),
@@ -43,11 +22,11 @@ rec: any) => {
       beneficiaries: Number(rec.beneficiaries || rec.total_beneficiaries || 0),
       fundsReleased: Number(rec.funds_released || rec.amount_released || 0),
       daysWorked: Number(rec.days_worked || rec.person_days || 0),
-      paymentsOnTimePct: Number(rec.payments_on_time_pct || rec.payments_on_time || 0)
+      paymentsOnTimePct: Number(rec.payments_on_time_pct || rec.payments_on_time || 0),
     },
     sourceUrl: rec.source || null,
     fetchedAt: new Date(),
-    raw: rec
+    raw: rec,
   };
 };
 
@@ -56,10 +35,12 @@ export const runFetch = async () => {
     const payload = await fetchMGNREGARecords({ limit: 5000 });
     const records = payload?.records || payload?.data || [];
     logger.info(`Fetched ${records.length} records from MGNREGA source`);
+
     for (const rec of records) {
       const snap = normalizeRecord(rec);
       await upsertDistrictSnapshot(snap);
     }
+
     logger.info("ETL complete");
   } catch (err) {
     logger.error("ETL job failed", err);
@@ -68,5 +49,7 @@ export const runFetch = async () => {
 
 /* If run directly (ts-node src/jobs/fetchMGNREGAData.ts) */
 if (require.main === module) {
-  runFetch().then(() => process.exit(0)).catch(() => process.exit(1));
+  runFetch()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
 }
