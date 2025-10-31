@@ -12,15 +12,15 @@ export interface IDistrictSnapshot {
 
   // Key Metrics from API, names adjusted to match API response
   Approved_Labour_Budget: number;
-  Average_Wage_rate_per_day_per_person: number;
-  Average_days_of_employment_provided_per_Household: number;
-  Total_No_of_JobCards_issued: number;
-  Total_No_of_Workers: number;
-  SC_workers_against_active_workers: number;
-  ST_workers_against_active_workers: number;
-  Total_Exp: number;
-  percentage_payments_gererated_within_15_days: number;
-  Women_Persondays: number;
+   Average_Wage_rate_per_day_per_person: number;
+   Average_days_of_employment_provided_per_Household: number;
+   Total_No_of_JobCards_issued: number;
+   Total_No_of_Workers: number;
+   SC_workers_against_active_workers: number;
+   ST_workers_against_active_workers: number;
+   Total_Exp: number;
+   percentage_payments_gererated_within_15_days: number;
+   Women_Persondays: number;
 
   // Additional fields from the API
   Differently_abled_persons_worked: number;

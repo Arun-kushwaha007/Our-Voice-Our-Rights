@@ -11,8 +11,7 @@ interface PerformanceCardProps {
 
 const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
   const { t } = useTranslation();
-
-  const metrics = [
+const metrics = [
     {
       label: t('performanceIndex'),
       value: districtData.performanceIndex,
@@ -33,7 +32,7 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
     },
     {
       label: t('totalExpenditure'),
-      value: districtData.Total_Exp,
+      value: districtData.total_expenditure,
       icon: DollarSign,
       color: 'text-purple-400',
       isCurrency: true,
@@ -45,7 +44,7 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
       color: 'text-pink-400',
     },
   ];
-
+  
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.95 },
     visible: {

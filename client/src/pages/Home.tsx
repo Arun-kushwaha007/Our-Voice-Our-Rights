@@ -36,11 +36,9 @@ const Home: React.FC = () => {
       try {  
         setError(null);  
         console.log('Fetching states from API...');  
-        // FIXED: Changed to { data: string[] }  
         const response = await axios.get<{ data: string[] }>('/api/districts/states');  
         console.log('API response received:', response);  
           
-        // FIXED: Changed to response.data.data  
         const fetchedStates = response.data.data || [];  
         console.log('Extracted states data:', fetchedStates);  
   
@@ -78,16 +76,15 @@ const Home: React.FC = () => {
     const fetchStateData = async () => {  
       setLoadingStateData(true);  
       setError(null);  
-      dispatch({ type: 'SET_SELECTED_DISTRICT', payload: '' });  
-      setTrendData([]);  
+      dispatch({ type: 'SET_SELECTED_DISTRICT', payload: '' }); // Clear district selection  
+      setDistrictsInState([]); // Clear old district data immediately  
+      setTrendData([]); // Clear old trend data
   
       try {  
         console.log(`Fetching district data for state: ${selectedState}...`);  
-        // FIXED: Changed to { data: IDistrictSnapshot[] }  
         const response = await axios.get<{ data: IDistrictSnapshot[] }>(`/api/districts/states/${selectedState}`);  
         console.log('API response for district data:', response);  
           
-        // FIXED: Changed to response.data.data  
         const fetchedDistricts = response.data.data || [];  
         console.log('Extracted district data:', fetchedDistricts);  
   
@@ -127,9 +124,7 @@ const Home: React.FC = () => {
       setLoadingTrendData(true);  
       setError(null);  
       try {  
-        // FIXED: Changed to { data: IDistrictSnapshot[] }  
         const response = await axios.get<{ data: IDistrictSnapshot[] }>(`/api/districts/states/${selectedState}/districts/${selectedDistrict}`);  
-        // FIXED: Changed to response.data.data  
         setTrendData(response.data.data || []);  
       } catch (err) {  
         setError(t('errorFetchingTrendData'));  
@@ -192,24 +187,24 @@ const Home: React.FC = () => {
         {(loadingStates || loadingStateData) && <Loader />}  
           
         {error && !loadingStateData && (  
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center mt-10 text-red-400">  
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center mt-10 text-red-400">  
             <p>{error}</p>  
           </motion.div>  
         )}  
   
         {!loadingStateData && selectedDistrictData && (  
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10">  
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10">  
             <PerformanceCard districtData={selectedDistrictData} />  
             {loadingTrendData && (  
               <>  
-                <Loader />  
-                <p className="text-center text-gray-400 mt-2">{t('loadingTrendData')}</p>  
+              <Loader />  
+              <p className="text-center text-gray-400 mt-2">{t('loadingTrendData')}</p>  
               </>  
             )}  
             {!loadingTrendData && trendData.length > 0 && (  
               <TrendChart trendData={trendData} districtName={selectedDistrict || ''} />  
             )}  
-          </motion.div>  
+            </motion.div>  
         )}  
       </div>  
     </main>  

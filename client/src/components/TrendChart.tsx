@@ -49,7 +49,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ trendData, districtName }) => {
     return monthA - monthB;
   });
 
-  const chartData = sortedData.map(d => ({
+   const chartData = sortedData.map(d => ({
     name: `${d.month.substring(0, 3)} ${d.fin_year}`,
     performanceIndex: d.performanceIndex,
     avgDaysEmployment: d.Average_days_of_employment_provided_per_Household,
