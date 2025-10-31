@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { getDistricts, getDistrictById } from "../controllers/districtController";
+// import { Router } from "express";
+// import { getDistricts, getDistrictById } from "../controllers/districtController";
 
-const router = Router();
+// const router = Router();
 
-router.route("/").get(getDistricts);
-router.route("/:id").get(getDistrictById);
+// router.route("/").get(getDistricts);
+// router.route("/:id").get(getDistrictById);
 
-export default router;
+// export default router;

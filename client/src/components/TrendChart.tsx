@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   LineChart,
   Line,
@@ -8,23 +8,39 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-import type { IDistrictSnapshot } from "../types";
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import type{ IDistrictSnapshot } from '../types';
+import { formatNumber } from '../utils/formatters';
 
 interface TrendChartProps {
   trendData: IDistrictSnapshot[];
+  districtName: string;
 }
 
-const TrendChart: React.FC<TrendChartProps> = ({ trendData }) => {
+const TrendChart: React.FC<TrendChartProps> = ({ trendData, districtName }) => {
   const { t } = useTranslation();
 
-  const data = trendData.map((d) => ({
-    name: `${d.month}/${d.year}`,
-    [t("beneficiaries")]: d.metrics.beneficiaries,
-    [t("fundsReleased")]: d.metrics.fundsReleased,
-  })).reverse();
+  // Sort data chronologically for a proper time-series chart
+  const sortedData = [...trendData].sort((a, b) => {
+    // A simple date conversion for sorting, assuming YYYY-YYYY format
+    const yearA = parseInt(a.fin_year.split('-')[0]);
+    const yearB = parseInt(b.fin_year.split('-')[0]);
+    if (yearA !== yearB) return yearA - yearB;
+    // If years are same, sort by month (requires converting month name to number)
+    const monthA = new Date(Date.parse(a.month +" 1, 2012")).getMonth();
+    const monthB = new Date(Date.parse(b.month +" 1, 2012")).getMonth();
+    return monthA - monthB;
+  });
+
+  const chartData = sortedData.map(d => ({
+    name: `${d.month.substring(0, 3)} ${d.fin_year}`,
+    performanceIndex: d.performanceIndex,
+    avgDaysEmployment: d.average_days_of_employment_provided_per_household,
+    womenParticipation: d.women_persondays_percent,
+    timelyPayments: d.percentage_payments_generated_within_15_days,
+  }));
 
   return (
     <motion.div
@@ -33,30 +49,28 @@ const TrendChart: React.FC<TrendChartProps> = ({ trendData }) => {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="mt-8 bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-lg shadow-lg p-6"
     >
-      <h3 className="text-xl font-semibold text-white mb-4">{t("trend")}</h3>
+      <h3 className="text-xl font-semibold text-white mb-4">{t('trendFor', { district: districtName })}</h3>
       <ResponsiveContainer width="100%" height={400}>
         <LineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
+          data={chartData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#4A5568" />
           <XAxis dataKey="name" stroke="#A0AEC0" />
           <YAxis stroke="#A0AEC0" />
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(26, 32, 44, 0.8)",
-              borderColor: "#4A5568",
-              color: "#E2E8F0",
+              backgroundColor: 'rgba(26, 32, 44, 0.8)',
+              borderColor: '#4A5568',
+              color: '#E2E8F0',
             }}
+            formatter={(value: number) => formatNumber(value)}
           />
-          <Legend wrapperStyle={{ color: "#E2E8F0" }} />
-          <Line type="monotone" dataKey={t("beneficiaries")} stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey={t("fundsReleased")} stroke="#82ca9d" />
+          <Legend wrapperStyle={{ color: '#E2E8F0' }} />
+          <Line type="monotone" dataKey="performanceIndex" name={t('performanceIndex')} stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="avgDaysEmployment" name={t('avgDaysEmployment')} stroke="#82ca9d" />
+          <Line type="monotone" dataKey="womenParticipation" name={t('womenParticipation')} stroke="#ffc658" />
+          <Line type="monotone" dataKey="timelyPayments" name={t('timelyPayments')} stroke="#ff7300" />
         </LineChart>
       </ResponsiveContainer>
     </motion.div>

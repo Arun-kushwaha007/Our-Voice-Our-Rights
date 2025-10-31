@@ -1,62 +1,91 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
-import type { IDistrictSnapshot } from "../types";
-import { PERFORMANCE_THRESHOLDS } from "../utils/constants";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import type { IDistrictSnapshot } from '../types';
+import { formatNumber } from '../utils/formatters';
+import { TrendingUp, TrendingDown, Clock, Users, DollarSign, Percent } from 'lucide-react';
 
 interface PerformanceCardProps {
-  summary: {
-    districtName: string;
-    latest: IDistrictSnapshot;
-  };
+  districtData: IDistrictSnapshot;
 }
 
-const getPerformanceLevel = (metric: keyof typeof PERFORMANCE_THRESHOLDS, value: number) => {
-  if (value >= PERFORMANCE_THRESHOLDS[metric].good) return "good";
-  if (value <= PERFORMANCE_THRESHOLDS[metric].poor) return "poor";
-  return "needsImprovement";
-};
-
-const PerformanceCard: React.FC<PerformanceCardProps> = ({ summary }) => {
+const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
   const { t } = useTranslation();
-  const { metrics } = summary.latest;
 
-  const performanceData = [
-    { label: "beneficiaries", value: metrics.beneficiaries, unit: "" },
-    { label: "fundsReleased", value: metrics.fundsReleased, unit: "Cr" },
-    { label: "daysWorked", value: metrics.daysWorked, unit: "" },
-    { label: "paymentsOnTime", value: metrics.paymentsOnTimePct || 0, unit: "%" },
+  const metrics = [
+    {
+      label: t('performanceIndex'),
+      value: districtData.performanceIndex,
+      icon: districtData.performanceIndex > 50 ? TrendingUp : TrendingDown,
+      color: districtData.performanceIndex > 50 ? 'text-green-400' : 'text-red-400',
+    },
+    {
+      label: t('avgDaysEmployment'),
+      value: districtData.average_days_of_employment_provided_per_household,
+      icon: Clock,
+      color: 'text-blue-400',
+    },
+    {
+      label: t('jobCardsIssued'),
+      value: districtData.total_no_of_jobcards_issued,
+      icon: Users,
+      color: 'text-indigo-400',
+    },
+    {
+      label: t('totalExpenditure'),
+      value: districtData.total_expenditure,
+      icon: DollarSign,
+      color: 'text-purple-400',
+      isCurrency: true,
+    },
+     {
+      label: t('womenParticipation'),
+      value: districtData.women_persondays_percent,
+      icon: Percent,
+      color: 'text-pink-400',
+    },
   ];
 
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-lg shadow-lg overflow-hidden"
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-lg shadow-lg p-6"
     >
-      <div className="p-5">
-        <h3 className="text-xl font-semibold text-white mb-4">{summary.districtName}</h3>
-        <dl className="space-y-4">
-          {performanceData.map(({ label, value, unit }) => {
-            const level = getPerformanceLevel(label as keyof typeof PERFORMANCE_THRESHOLDS, value);
-            return (
-              <div key={label} className="flex justify-between items-center">
-                <dt className="text-sm font-medium text-gray-400">{t(label)}</dt>
-                <dd className="flex items-baseline text-lg font-semibold text-white">
-                  {value.toLocaleString()} {unit}
-                  <span className={`ml-3 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    level === "good" ? "bg-green-900 text-green-200" :
-                    level === "poor" ? "bg-red-900 text-red-200" :
-                    "bg-yellow-900 text-yellow-200"
-                  }`}>
-                    {t(level)}
-                  </span>
-                </dd>
-              </div>
-            );
-          })}
-        </dl>
+      <h3 className="text-2xl font-bold text-white mb-6">{districtData.district_name}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {metrics.map(metric => (
+          <motion.div
+            key={metric.label}
+            variants={itemVariants}
+            className="bg-gray-900/50 p-4 rounded-lg flex items-center"
+          >
+            <metric.icon className={`w-8 h-8 mr-4 ${metric.color}`} />
+            <div>
+              <p className="text-sm text-gray-400">{metric.label}</p>
+              <p className="text-2xl font-semibold text-white">
+                {formatNumber(metric.value, metric.isCurrency)}
+              </p>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );

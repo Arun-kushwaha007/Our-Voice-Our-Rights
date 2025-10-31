@@ -1,44 +1,53 @@
-import DistrictSnapshot, { IDistrictSnapshot } from "../models/District";
-import { logger } from "../utils/logger";
+import DistrictSnapshot, { IDistrictSnapshot } from '../models/District';
 
 /**
- * Save a normalized snapshot for a district-month.
+ * Get all available snapshots for a specific district, sorted by date.
+ * @param stateName - The name of the state.
+ * @param districtName - The name of the district.
+ * @returns A promise that resolves to an array of district snapshots.
  */
-export const upsertDistrictSnapshot = async (snap: Partial<IDistrictSnapshot>) => {
-  if (!snap.districtId || !snap.year || !snap.month) {
-    throw new Error("Invalid snapshot payload");
-  }
-  const filter = { districtId: snap.districtId, year: snap.year, month: snap.month };
-  const doc = await DistrictSnapshot.findOneAndUpdate(filter, { $set: snap }, { upsert: true, new: true });
-  return doc;
+export const getDistrictTimeSeries = async (stateName: string, districtName: string): Promise<IDistrictSnapshot[]> => {
+  return DistrictSnapshot.find({ state_name: stateName, district_name: districtName })
+    .sort({ fin_year: -1, month: -1 }) // Sort by most recent first
+    .lean();
 };
 
-export const getLatestSummary = async (districtId: string) => {
-  // latest snapshot sorted by year/month
-  return DistrictSnapshot.findOne({ districtId }).sort({ year: -1, month: -1 }).lean();
-};
-
-export const listDistricts = async () => {
-  // list distinct districts with latest snapshot metadata
-  return DistrictSnapshot.aggregate([
-    { $sort: { year: -1, month: -1 } },
+/**
+ * Get the latest available snapshot for every district in a given state.
+ * @param stateName - The name of the state.
+ * @returns A promise that resolves to an array of the latest snapshots for each district.
+ */
+export const getLatestStateData = async (stateName: string): Promise<IDistrictSnapshot[]> => {
+  // Use aggregation to find the latest document for each district
+  const latestData = await DistrictSnapshot.aggregate([
+    { $match: { state_name: stateName } },
+    { $sort: { fin_year: -1, month: -1 } },
     {
       $group: {
-        _id: "$districtId",
-        districtName: { $first: "$districtName" },
-        state: { $first: "$state" },
-        lastFetched: { $first: "$fetchedAt" }
+        _id: '$district_name', // Group by district
+        latestSnapshot: { $first: '$$ROOT' } // Get the first document (which is the latest)
       }
     },
-    { $project: { _id: 0, districtId: "$_id", districtName: 1, state: 1, lastFetched: 1 } },
-    { $sort: { districtName: 1 } }
+    { $replaceRoot: { newRoot: '$latestSnapshot' } }, // Promote the snapshot to the root level
+    { $sort: { district_name: 1 } } // Sort alphabetically by district name
   ]);
+
+  return latestData;
 };
 
-export const getLastNMonths = async (districtId: string, months = 12) => {
-  // get last N monthly snapshots
-  return DistrictSnapshot.find({ districtId })
-    .sort({ year: -1, month: -1 })
-    .limit(months)
-    .lean();
+/**
+ * Get a list of all unique states available in the database.
+ * @returns A promise that resolves to an array of state names.
+ */
+export const listStates = async (): Promise<string[]> => {
+  return DistrictSnapshot.distinct('state_name');
+};
+
+/**
+ * Get a list of all unique districts for a given state.
+ * @param stateName - The name of the state.
+ * @returns A promise that resolves to an array of district names.
+ */
+export const listDistrictsByState = async (stateName: string): Promise<string[]> => {
+  return DistrictSnapshot.distinct('district_name', { state_name: stateName });
 };

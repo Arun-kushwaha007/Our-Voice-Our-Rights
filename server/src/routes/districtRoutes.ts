@@ -1,24 +1,23 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
-  listDistricts,
-  getDistrictSummary,
-  getDistrictTimeseries,
-} from "../controllers/districtController";
-import { compareDistricts } from "../controllers/compareController";
-import { getDistrictFromCoords } from "../services/geolocationService";
-import { asyncHandler } from "../middleware/asyncHandler";
+  getStateData,
+  getDistrictData,
+  getStates,
+  getDistrictsByState,
+} from '../controllers/districtController';
 
 const router = Router();
 
-// Specific routes must be defined before dynamic routes
-router.get("/", listDistricts);
-router.get("/by-location", asyncHandler(async (req, res) => {
-    const { lat, lon } = req.query;
-    const district = await getDistrictFromCoords(Number(lat), Number(lon));
-    res.json({ district });
-}));
-router.get("/compare", compareDistricts);
-router.get("/:id/summary", getDistrictSummary);
-router.get("/:id/timeseries", getDistrictTimeseries);
+// Route to get a list of all states
+router.get('/states', getStates);
+
+// Route to get a list of districts for a specific state
+router.get('/states/:stateName/districts', getDistrictsByState);
+
+// Route to get the latest data for all districts in a state
+router.get('/states/:stateName', getStateData);
+
+// Route to get time-series data for a specific district
+router.get('/states/:stateName/districts/:districtName', getDistrictData);
 
 export default router;
