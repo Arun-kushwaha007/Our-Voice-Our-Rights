@@ -74,6 +74,6 @@ const updateDistrictData = async (stateName: string) => {
     }
 };
 
-// The script can be run with a state name from the command line, defaulting to "Uttar Pradesh"
-const state = process.argv[2] || "UTTAR PRADESH";
+
+const state = process.argv[2] || "";
 updateDistrictData(state);
