@@ -37,9 +37,9 @@ const TrendChart: React.FC<TrendChartProps> = ({ trendData, districtName }) => {
   const chartData = sortedData.map(d => ({
     name: `${d.month.substring(0, 3)} ${d.fin_year}`,
     performanceIndex: d.performanceIndex,
-    avgDaysEmployment: d.average_days_of_employment_provided_per_household,
+    avgDaysEmployment: d.Average_days_of_employment_provided_per_Household,
     womenParticipation: d.women_persondays_percent,
-    timelyPayments: d.percentage_payments_generated_within_15_days,
+    timelyPayments: d.percentage_payments_gererated_within_15_days,
   }));
 
   return (

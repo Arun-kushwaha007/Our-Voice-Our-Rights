@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAppContext } from '../context/AppContext';
-import StateSelector from '../components/StateSelector';
-import DistrictSelector from '../components/DistrictSelector';
+import SearchableSelector from '../components/SearchableSelector';
 import PerformanceCard from '../components/PerformanceCard';
 import TrendChart from '../components/TrendChart';
 import Loader from '../components/Loader';
@@ -19,7 +18,7 @@ const Home: React.FC = () => {
 
   // Component State
   const [states, setStates] = useState<string[]>([]);
-  const [selectedState, setSelectedState] = useState<string>('UTTAR PRADESH');
+  const [selectedState, setSelectedState] = useState<string>('');
   const [districtsInState, setDistrictsInState] = useState<IDistrictSnapshot[]>([]);
   const [trendData, setTrendData] = useState<IDistrictSnapshot[]>([]);
 
@@ -36,13 +35,35 @@ const Home: React.FC = () => {
     const fetchStates = async () => {
       try {
         setError(null);
-        const response = await axios.get<{ data: string[] }>('/api/v1/districts/states');
-        setStates(response.data.data || []);
+        console.log('Fetching states from API...');
+        const response = await axios.get<{ records: { state_name: string }[] }>('/api/districts/states');
+        console.log('API response received:', response);
+        
+        const fetchedStates = response.data.records?.map(record => record.state_name) || [];
+        console.log('Extracted states data:', fetchedStates);
+
+        if (Array.isArray(fetchedStates)) {
+          const uniqueStates = [...new Set(fetchedStates)];
+          setStates(uniqueStates);
+          console.log('States successfully set in component state.');
+        } else {
+          throw new Error('API response for states is not a valid array.');
+        }
       } catch (err) {
-        setError(t('errorFetchingStates'));
+        const errorMessage = t('errorFetchingStates');
+        setError(errorMessage);
         console.error('Error fetching states:', err);
+        if (axios.isAxiosError(err)) {
+          console.error('Axios error details:', {
+            message: err.message,
+            response: err.response?.data,
+            status: err.response?.status,
+            headers: err.response?.headers,
+          });
+        }
       } finally {
         setLoadingStates(false);
+        console.log('Finished fetching states.');
       }
     };
     fetchStates();
@@ -59,14 +80,35 @@ const Home: React.FC = () => {
       setTrendData([]); // Clear old trend data
 
       try {
-        const response = await axios.get<{ data: IDistrictSnapshot[] }>(`/api/v1/districts/states/${selectedState}`);
-        setDistrictsInState(response.data.data || []);
+        console.log(`Fetching district data for state: ${selectedState}...`);
+        const response = await axios.get<{ records: IDistrictSnapshot[] }>(`/api/districts/states/${selectedState}`);
+        console.log('API response for district data:', response);
+        
+        const fetchedDistricts = response.data.records || [];
+        console.log('Extracted district data:', fetchedDistricts);
+
+        if (Array.isArray(fetchedDistricts)) {
+          setDistrictsInState(fetchedDistricts);
+          console.log('District data successfully set in component state.');
+        } else {
+          throw new Error('API response for district data is not a valid array.');
+        }
       } catch (err) {
-        setError(t('errorFetchingDistrictData'));
+        const errorMessage = t('errorFetchingDistrictData');
+        setError(errorMessage);
         console.error(`Error fetching data for state ${selectedState}:`, err);
         setDistrictsInState([]);
+        if (axios.isAxiosError(err)) {
+          console.error('Axios error details:', {
+            message: err.message,
+            response: err.response?.data,
+            status: err.response?.status,
+            headers: err.response?.headers,
+          });
+        }
       } finally {
         setLoadingStateData(false);
+        console.log('Finished fetching district data.');
       }
     };
 
@@ -81,8 +123,8 @@ const Home: React.FC = () => {
       setLoadingTrendData(true);
       setError(null);
       try {
-        const response = await axios.get<{ data: IDistrictSnapshot[] }>(`/api/v1/districts/states/${selectedState}/districts/${selectedDistrict}`);
-        setTrendData(response.data.data || []);
+        const response = await axios.get<{ records: IDistrictSnapshot[] }>(`/api/districts/states/${selectedState}/districts/${selectedDistrict}`);
+        setTrendData(response.data.records || []);
       } catch (err) {
         setError(t('errorFetchingTrendData'));
         console.error(`Error fetching trend data for ${selectedDistrict}:`, err);
@@ -125,18 +167,20 @@ const Home: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto"
         >
-          <StateSelector
-            states={states}
-            selectedState={selectedState}
-            onStateChange={setSelectedState}
-            />
-          <DistrictSelector
+          <SearchableSelector
+            options={states}
+            value={selectedState}
+            onChange={setSelectedState}
+            label={t('selectState')}
+            disabled={loadingStates}
+          />
+          <SearchableSelector
             options={districtOptions}
             value={selectedDistrict || ''}
             onChange={(value) => dispatch({ type: 'SET_SELECTED_DISTRICT', payload: value })}
             label={t('selectDistrict')}
             disabled={loadingStateData || !selectedState}
-            />
+          />
         </motion.div>
 
         {(loadingStates || loadingStateData) && <Loader />}

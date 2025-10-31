@@ -21,13 +21,13 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
     },
     {
       label: t('avgDaysEmployment'),
-      value: districtData.average_days_of_employment_provided_per_household,
+      value: districtData.Average_days_of_employment_provided_per_Household,
       icon: Clock,
       color: 'text-blue-400',
     },
     {
       label: t('jobCardsIssued'),
-      value: districtData.total_no_of_jobcards_issued,
+      value: districtData.Total_No_of_JobCards_issued,
       icon: Users,
       color: 'text-indigo-400',
     },
