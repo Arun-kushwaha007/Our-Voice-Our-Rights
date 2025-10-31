@@ -62,15 +62,15 @@ export const getDistrictData = asyncHandler(async (req: Request, res: Response) 
 /**
  * Controller to get a list of all available states.
  */
-// export const getStates = asyncHandler(async (req: Request, res: Response) => {
-//   try {
-//     const states = await districtService.listStates();
-//     res.json({ data: states });
-//   } catch (error) {
-//     logger.error('Error fetching states list:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
+export const getStates = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const states = await districtService.listStates();
+    res.json({ data: states });
+  } catch (error) {
+    logger.error('Error fetching states list:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 /**
  * Controller to get a list of all districts for a given state.
@@ -86,17 +86,6 @@ export const getDistrictsByState = asyncHandler(async (req: Request, res: Respon
     res.json({ data: districts });
   } catch (error) {
     logger.error(`Error fetching districts for state ${stateName}:`, error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-
-export const getStates = asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const states = await districtService.listStates();
-    res.json({ data: states });
-  } catch (error) {
-    logger.error('Error fetching states list:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

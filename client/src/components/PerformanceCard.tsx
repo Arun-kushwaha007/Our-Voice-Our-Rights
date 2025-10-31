@@ -33,7 +33,7 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({ districtData }) => {
     },
     {
       label: t('totalExpenditure'),
-      value: districtData.total_expenditure,
+      value: districtData.Total_Exp,
       icon: DollarSign,
       color: 'text-purple-400',
       isCurrency: true,

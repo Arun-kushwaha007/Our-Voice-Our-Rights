@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+import path from "path";
+
+// Resolve the correct path to the .env file
+const envPath = path.resolve(process.cwd(), 'server', '.env');
+dotenv.config({ path: envPath });
 import { fetchMGNREGAData } from "../services/mgnregaService";
 import DistrictSnapshot from "../models/District";
 import { connectDB } from "../config/db";
@@ -23,50 +29,61 @@ const calculatePerformanceIndex = (record: any): number => {
     return parseFloat(index.toFixed(2));
 };
 
-const updateDistrictData = async (stateName: string) => {
+const allStates = [
+    "ANDAMAN AND NICOBAR ISLANDS", "ANDHRA PRADESH", "ARUNACHAL PRADESH", "ASSAM", "BIHAR",
+    "CHANDIGARH", "CHHATTISGARH", "DADRA AND NAGAR HAVELI", "DAMAN AND DIU", "DELHI", "GOA",
+    "GUJARAT", "HARYANA", "HIMACHAL PRADESH", "JAMMU AND KASHMIR", "JHARKHAND", "KARNATAKA",
+    "KERALA", "LADAKH", "LAKSHADWEEP", "MADHYA PRADESH", "MAHARASHTRA", "MANIPUR", "MEGHALAYA",
+    "MIZORAM", "NAGALAND", "ODISHA", "PUDUCHERRY", "PUNJAB", "RAJASTHAN", "SIKKIM",
+    "TAMIL NADU", "TELANGANA", "TRIPURA", "UTTAR PRADESH", "UTTARAKHAND", "WEST BENGAL"
+];
+
+const updateAllDistrictData = async () => {
     try {
         await connectDB();
-        console.log('Fetching MGNREGA data for state:', stateName);
-        const records = await fetchMGNREGAData(stateName);
+        for (const stateName of allStates) {
+            console.log('Fetching MGNREGA data for state:', stateName);
+            const records = await fetchMGNREGAData(stateName);
 
-        if (records && records.length > 0) {
-            console.log(`Found ${records.length} records for ${stateName}. Processing...`);
-            for (const record of records) {
-                try {
-                    const filter = {
-                        fin_year: record.fin_year,
-                        month: record.month,
-                        state_name: record.state_name,
-                        district_name: record.district_name,
-                    };
+            if (records && records.length > 0) {
+                console.log(`Found ${records.length} records for ${stateName}. Processing...`);
+                for (const record of records) {
+                    try {
+                        const filter = {
+                            fin_year: record.fin_year,
+                            month: record.month,
+                            state_name: record.state_name,
+                            district_name: record.district_name,
+                        };
 
-                    const update = {
-                        ...filter,
-                        approved_labour_budget: safeParseFloat(record.approved_labour_budget),
-                        average_wage_rate_per_day_per_person: safeParseFloat(record.average_wage_rate_per_day_per_person),
-                        average_days_of_employment_provided_per_household: safeParseFloat(record.average_days_of_employment_provided_per_household),
-                        total_no_of_jobcards_issued: safeParseFloat(record.total_no_of_jobcards_issued),
-                        total_no_of_workers: safeParseFloat(record.total_no_of_workers),
-                        sc_workers_against_active_workers: safeParseFloat(record.sc_workers_against_active_workers),
-                        st_workers_against_active_workers: safeParseFloat(record.st_workers_against_active_workers),
-                        women_persondays_percent: safeParseFloat(record.women_persondays_percent),
-                        percentage_payments_generated_within_15_days: safeParseFloat(record.percentage_payments_generated_within_15_days),
-                        total_expenditure: safeParseFloat(record.total_expenditure),
-                        performanceIndex: calculatePerformanceIndex(record),
-                        fetchedAt: new Date(),
-                    };
-                    
-                    await DistrictSnapshot.findOneAndUpdate(filter, update, { upsert: true, new: true });
-                } catch (dbError) {
-                    console.error(`Error processing record for ${record.district_name}:`, dbError);
+                        const update = {
+                            ...filter,
+                            approved_labour_budget: safeParseFloat(record.approved_labour_budget),
+                            average_wage_rate_per_day_per_person: safeParseFloat(record.average_wage_rate_per_day_per_person),
+                            average_days_of_employment_provided_per_household: safeParseFloat(record.average_days_of_employment_provided_per_household),
+                            total_no_of_jobcards_issued: safeParseFloat(record.total_no_of_jobcards_issued),
+                            total_no_of_workers: safeParseFloat(record.total_no_of_workers),
+                            sc_workers_against_active_workers: safeParseFloat(record.sc_workers_against_active_workers),
+                            st_workers_against_active_workers: safeParseFloat(record.st_workers_against_active_workers),
+                            women_persondays_percent: safeParseFloat(record.women_persondays_percent),
+                            percentage_payments_generated_within_15_days: safeParseFloat(record.percentage_payments_generated_within_15_days),
+                            total_expenditure: safeParseFloat(record.total_expenditure),
+                            performanceIndex: calculatePerformanceIndex(record),
+                            fetchedAt: new Date(),
+                        };
+                        
+                        await DistrictSnapshot.findOneAndUpdate(filter, update, { upsert: true, new: true });
+                    } catch (dbError) {
+                        console.error(`Error processing record for ${record.district_name}:`, dbError);
+                    }
                 }
+                console.log(`District data for ${stateName} updated successfully.`);
+            } else {
+                console.log(`No records found for ${stateName}.`);
             }
-            console.log(`District data for ${stateName} updated successfully.`);
-        } else {
-            console.log(`No records found for ${stateName}.`);
         }
     } catch (error) {
-        console.error(`Error in ETL job for ${stateName}:`, error);
+        console.error('Error in ETL job:', error);
         process.exit(1); // Exit with error code if the job fails
     } finally {
         await mongoose.disconnect();
@@ -74,6 +91,4 @@ const updateDistrictData = async (stateName: string) => {
     }
 };
 
-
-const state = process.argv[2] || "";
-updateDistrictData(state);
+updateAllDistrictData();

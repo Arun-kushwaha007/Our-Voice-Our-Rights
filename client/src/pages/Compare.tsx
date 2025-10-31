@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAppContext } from '../context/AppContext';
-import StateSelector from '../components/StateSelector';
-import DistrictSelector from '../components/DistrictSelector';
+// import StateSelector from '../components/StateSelector';
+// import DistrictSelector from '../components/DistrictSelector';
 import CompareView from '../components/CompareView';
 import Loader from '../components/Loader';
 import type{ IDistrictSnapshot } from '../types';
@@ -19,7 +19,7 @@ const Compare: React.FC = () => {
 
   // Component State
   const [states, setStates] = useState<string[]>([]);
-  const [selectedState, setSelectedState] = useState<string>('UTTAR PRADESH');
+  const [selectedState, setSelectedState] = useState<string>('');
   const [districtsInState, setDistrictsInState] = useState<IDistrictSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ const Compare: React.FC = () => {
   useEffect(() => {
     const fetchStates = async () => {
       try {
-        const response = await axios.get<{ data: string[] }>('/api/v1/districts/states');
+        const response = await axios.get<{ data: string[] }>('/api/districts/states');
         setStates(response.data.data || []);
       } catch (err) {
         setError(t('errorFetchingStates'));

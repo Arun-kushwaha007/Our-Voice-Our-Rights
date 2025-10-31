@@ -22,15 +22,30 @@ interface TrendChartProps {
 const TrendChart: React.FC<TrendChartProps> = ({ trendData, districtName }) => {
   const { t } = useTranslation();
 
+  // Define a stable order for months
+  const monthOrder: { [key: string]: number } = {
+    JANUARY: 1,
+    FEBRUARY: 2,
+    MARCH: 3,
+    APRIL: 4,
+    MAY: 5,
+    JUNE: 6,
+    JULY: 7,
+    AUGUST: 8,
+    SEPTEMBER: 9,
+    OCTOBER: 10,
+    NOVEMBER: 11,
+    DECEMBER: 12,
+  };
+
   // Sort data chronologically for a proper time-series chart
   const sortedData = [...trendData].sort((a, b) => {
-    // A simple date conversion for sorting, assuming YYYY-YYYY format
     const yearA = parseInt(a.fin_year.split('-')[0]);
     const yearB = parseInt(b.fin_year.split('-')[0]);
     if (yearA !== yearB) return yearA - yearB;
-    // If years are same, sort by month (requires converting month name to number)
-    const monthA = new Date(Date.parse(a.month +" 1, 2012")).getMonth();
-    const monthB = new Date(Date.parse(b.month +" 1, 2012")).getMonth();
+
+    const monthA = monthOrder[a.month.toUpperCase()];
+    const monthB = monthOrder[b.month.toUpperCase()];
     return monthA - monthB;
   });
 
