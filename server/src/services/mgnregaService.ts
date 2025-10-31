@@ -11,7 +11,7 @@ export const fetchMGNREGAData = async (stateName: string) => {
     let offset = 0;
     const limit = 100;
     let hasMore = true;
-
+ console.log(`[MGNREGA Service] Starting fetch for state: ${stateName}`); 
     while (hasMore) {
         let retries = 0;
         let success = false;
@@ -28,6 +28,11 @@ export const fetchMGNREGAData = async (stateName: string) => {
                 });
 
                 const records = response.data.records;
+                   // ADD THIS LOGGING  
+                    if (records.length > 0) {  
+                        console.log('Sample API record:', JSON.stringify(records[0], null, 2));  
+                        console.log('Available fields:', Object.keys(records[0]));  
+                    }  
                 if (records.length > 0) {
                     allRecords.push(...records);
                     offset += limit;
