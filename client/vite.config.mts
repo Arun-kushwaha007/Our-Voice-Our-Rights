@@ -11,14 +11,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      '/api/districts': {
-        target: 'https://our-voice-our-rights-8y8i.onrender.com/',
-        //  target: 'http://localhost:5000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/districts/, '/api/districts'),
-      },
-    },
-  },
 })
