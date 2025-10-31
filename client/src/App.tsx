@@ -1,17 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
-import { LanguageProvider } from "./context/LanguageContext";
 import Home from "./pages/Home";
 import Compare from "./pages/Compare";
 import ErrorPage from "./pages/ErrorPage";
+import LanguageToggle from "./components/LanguageToggle";
+import OfflineBanner from "./components/OfflineBanner";
+import DistrictSelection from "./pages/DistrictSelection";
+import Dashboard from "./pages/Dashboard";
 
 const App: React.FC = () => {
   return (
     <Router>
-      <LanguageProvider>
         <AppProvider>
-          <nav className="bg-gray-800 text-white p-4">
+          <OfflineBanner />
+          <LanguageToggle />
+          <nav className="bg-white text-dark-text p-4 shadow-md">
             <ul className="flex space-x-4">
               <li><Link to="/">Home</Link></li>
               <li><Link to="/compare">Compare</Link></li>
@@ -19,11 +23,12 @@ const App: React.FC = () => {
           </nav>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/state/:stateName" element={<DistrictSelection />} />
+            <Route path="/state/:stateName/district/:districtName" element={<Dashboard />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </AppProvider>
-      </LanguageProvider>
     </Router>
   );
 };

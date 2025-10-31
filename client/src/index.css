@@ -1,1 +1,22 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap');
+
+@theme {
+  --color-saffron: #F4B400;
+  --color-india-green: #138808;
+  --color-india-blue: #000080;
+  --color-light-bg: #f7f9fc;
+  --color-dark-text: #333333;
+
+  --font-sans: "Noto Sans", sans-serif;
+  --font-devanagari: "Noto Sans Devanagari", sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-light-bg);
+    color: var(--color-dark-text);
+    font-size: 16px;
+  }
+}

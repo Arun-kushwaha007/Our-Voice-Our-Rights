@@ -7,25 +7,37 @@ import { AlertTriangle } from "lucide-react";
 const ErrorPage: React.FC = () => {
   const { t } = useTranslation();
 
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
   return (
-    <main className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+    <main className="min-h-screen bg-light-bg text-dark-text flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-lg p-10 shadow-lg"
+        className="text-center bg-white border border-gray-200 rounded-lg p-10 shadow-lg"
       >
         <div className="flex justify-center mb-4">
           <AlertTriangle className="w-16 h-16 text-red-500" />
         </div>
-        <h1 className="text-6xl font-extrabold text-red-500">404</h1>
-        <p className="text-2xl font-semibold mt-4">{t("pageNotFound")}</p>
-        <p className="text-gray-400 mt-2">{t("pageNotFoundSubtitle")}</p>
-        <Link to="/">
-          <button className="mt-8 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-500 transition-colors">
-            {t("goHome")}
+        <h1 className="text-6xl font-bold text-red-500">404</h1>
+        <p className="text-2xl font-semibold mt-4 font-devanagari">{t("pageNotFound")}</p>
+        <p className="text-gray-500 mt-2 font-devanagari">{t("pageNotFoundSubtitle")}</p>
+        <div className="flex justify-center mt-8 space-x-4">
+          <Link to="/">
+            <button className="px-6 py-3 bg-india-blue text-white font-semibold rounded-full hover:bg-opacity-90 transition-colors">
+              {t("goHome")}
+            </button>
+          </Link>
+          <button
+            onClick={handleRetry}
+            className="px-6 py-3 bg-mint-green text-dark-text font-semibold rounded-full hover:bg-opacity-90 transition-colors"
+          >
+            {t("retry")}
           </button>
-        </Link>
+        </div>
       </motion.div>
     </main>
   );

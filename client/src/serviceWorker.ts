@@ -19,29 +19,29 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const fetchEvent = event as FetchEvent;
-  fetchEvent.respondWith(
-    caches.match(fetchEvent.request).then((response) => {
-      if (response) {
-        return response;
-      }
-
-      const fetchRequest = fetchEvent.request.clone();
-
-      return fetch(fetchRequest).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
+  // Use a network-first strategy for API requests
+  if (fetchEvent.request.url.includes('/api/')) {
+    fetchEvent.respondWith(
+      fetch(fetchEvent.request)
+        .then((response) => {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(fetchEvent.request, responseToCache);
+          });
           return response;
-        }
-
-        const responseToCache = response.clone();
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(fetchEvent.request, responseToCache);
-        });
-
-        return response;
-      });
-    })
-  );
+        })
+        .catch(() => {
+          return caches.match(fetchEvent.request) as Promise<Response>;
+        })
+    );
+  } else {
+    // Use a cache-first strategy for static assets
+    fetchEvent.respondWith(
+      caches.match(fetchEvent.request).then((response) => {
+        return response || fetch(fetchEvent.request);
+      })
+    );
+  }
 });
 
 self.addEventListener("activate", (event) => {

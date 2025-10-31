@@ -1,36 +1,30 @@
-import { useState, useEffect } from "react";
-import { getDistrictByLocation } from "../utils/api";
+import { useState, useEffect } from 'react';
 
-export const useGeolocation = () => {
-  const [district, setDistrict] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | GeolocationPositionError | null>(null);
+const useGeolocation = () => {
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError(new Error("Geolocation is not supported by your browser"));
-      setLoading(false);
+      setError('Geolocation is not supported by your browser.');
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const districtName = await getDistrictByLocation(latitude, longitude);
-          setDistrict(districtName);
-        } catch (err) {
-          setError(err as Error);
-        } finally {
-          setLoading(false);
-        }
-      },
-      (err) => {
-        setError(err);
-        setLoading(false);
-      }
-    );
+    const onSuccess = (position: GeolocationPosition) => {
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    };
+
+    const onError = (error: GeolocationPositionError) => {
+      setError(error.message);
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError);
   }, []);
 
-  return { district, loading, error };
+  return { location, error };
 };
+
+export default useGeolocation;
