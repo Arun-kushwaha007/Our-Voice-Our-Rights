@@ -11,8 +11,8 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import type{ IDistrictSnapshot } from '../types';
-import { formatNumber } from '../utils/formatters';
+import type { IDistrictSnapshot } from '@/types';
+import { formatNumber } from '@/utils/formatters';
 
 interface TrendChartProps {
   trendData: IDistrictSnapshot[];

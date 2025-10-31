@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import type { IDistrictSnapshot } from '../types';
-import { formatNumber } from '../utils/formatters';
+import type { IDistrictSnapshot } from '@/types';
+import { formatNumber } from '@/utils/formatters';
 import { TrendingUp, TrendingDown, Clock, Users, DollarSign, Percent } from 'lucide-react';
 
 interface PerformanceCardProps {
