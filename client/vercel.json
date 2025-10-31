@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://our-voice-our-rights-8y8i.onrender.com/api/:path*"
+    }
+  ]
+}
