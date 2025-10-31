@@ -1,26 +1,26 @@
-import cron from "node-cron";
-import { exec } from "child_process";
-import path from "path";
+import cron from 'node-cron';
+import { exec } from 'child_process';
 
+// Schedule the ETL job to run daily at midnight IST
 export const scheduleJobs = () => {
-    // Schedule to run every day at midnight
-    cron.schedule("0 0 * * *", () => {
-        console.log("Running scheduled job: Fetch MGNREGA Data");
-        
-        // Path to the built JavaScript file for the job
-        const jobScriptPath = path.join(__dirname, 'fetchMGNREGAData.js');
-
-        // Execute the job using Node.js
-        exec(`node ${jobScriptPath}`, (error, stdout, stderr) => {
+    cron.schedule('0 0 * * *', () => {
+        console.log('Running the daily ETL job...');
+        const etlProcess = exec('ts-node src/jobs/fetchMGNREGAData.ts', (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error executing job: ${error.message}`);
+                console.error(`ETL job failed: ${error.message}`);
                 return;
             }
             if (stderr) {
-                console.error(`Job stderr: ${stderr}`);
+                console.error(`ETL job stderr: ${stderr}`);
                 return;
             }
-            console.log(`Job stdout: ${stdout}`);
+            console.log(`ETL job output: ${stdout}`);
         });
+
+        etlProcess.on('exit', (code) => {
+            console.log(`ETL job exited with code ${code}`);
+        });
+    }, {
+        timezone: 'Asia/Kolkata'
     });
 };

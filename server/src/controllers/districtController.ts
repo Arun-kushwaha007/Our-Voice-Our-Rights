@@ -11,7 +11,7 @@ import { seedDatabaseForState } from '../utils/seeder';
 export const getStateData = asyncHandler(async (req: Request, res: Response) => {
   const { stateName } = req.params;
   if (!stateName) {
-    return res.status(400).json({ message: 'State name is required.' });
+    return res.status(400).json({ success: false, message: 'State name is required.', data: null });
   }
 
   try {
@@ -27,14 +27,14 @@ export const getStateData = asyncHandler(async (req: Request, res: Response) => 
       
       if (data.length === 0) {
         // If still no data, it means the API returned nothing for this state
-        return res.status(404).json({ message: `No data could be found for state: ${stateName}` });
+        return res.status(404).json({ success: false, message: `No data could be found for state: ${stateName}`, data: null });
       }
     }
     
-    res.json({ data });
+    res.status(200).json({ success: true, message: 'State data fetched successfully.', data });
   } catch (error) {
     logger.error(`Error fetching data for state ${stateName}:`, error);
-    res.status(500).json({ message: 'Server error while fetching state data.' });
+    res.status(500).json({ success: false, message: 'Server error while fetching state data.', data: null });
   }
 });
 
@@ -44,18 +44,18 @@ export const getStateData = asyncHandler(async (req: Request, res: Response) => 
 export const getDistrictData = asyncHandler(async (req: Request, res: Response) => {
   const { stateName, districtName } = req.params;
   if (!stateName || !districtName) {
-    return res.status(400).json({ message: 'State and district names are required.' });
+    return res.status(400).json({ success: false, message: 'State and district names are required.', data: null });
   }
 
   try {
     const data = await districtService.getDistrictTimeSeries(stateName, districtName);
     if (data.length === 0) {
-      return res.status(404).json({ message: `No data found for district: ${districtName}, ${stateName}` });
+      return res.status(404).json({ success: false, message: `No data found for district: ${districtName}, ${stateName}`, data: null });
     }
-    res.json({ data });
+    res.status(200).json({ success: true, message: 'District data fetched successfully.', data });
   } catch (error) {
     logger.error(`Error fetching data for district ${districtName}:`, error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error', data: null });
   }
 });
 
@@ -65,10 +65,10 @@ export const getDistrictData = asyncHandler(async (req: Request, res: Response) 
 export const getStates = asyncHandler(async (req: Request, res: Response) => {
   try {
     const states = await districtService.listStates();
-    res.json({ data: states });
+    res.status(200).json({ success: true, message: 'States fetched successfully.', data: states });
   } catch (error) {
     logger.error('Error fetching states list:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error', data: null });
   }
 });
 
@@ -78,14 +78,14 @@ export const getStates = asyncHandler(async (req: Request, res: Response) => {
 export const getDistrictsByState = asyncHandler(async (req: Request, res: Response) => {
   const { stateName } = req.params;
   if (!stateName) {
-    return res.status(400).json({ message: 'State name is required.' });
+    return res.status(400).json({ success: false, message: 'State name is required.', data: null });
   }
 
   try {
     const districts = await districtService.listDistrictsByState(stateName);
-    res.json({ data: districts });
+    res.status(200).json({ success: true, message: 'Districts fetched successfully.', data: districts });
   } catch (error) {
     logger.error(`Error fetching districts for state ${stateName}:`, error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error', data: null });
   }
 });

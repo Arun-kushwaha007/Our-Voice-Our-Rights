@@ -50,6 +50,7 @@ export interface IDistrictSnapshot extends Document {
   // Metadata
   fetchedAt: Date;
   performanceIndex: number; // A calculated field
+  stale: boolean;
 }
 
 const DistrictSnapshotSchema: Schema = new Schema({
@@ -97,9 +98,11 @@ const DistrictSnapshotSchema: Schema = new Schema({
 
   fetchedAt: { type: Date, default: Date.now },
   performanceIndex: { type: Number, required: true },
+  stale: { type: Boolean, default: false },
 });
 
 // Unique index to prevent duplicate entries for the same district in the same month and year
 DistrictSnapshotSchema.index({ fin_year: 1, month: 1, state_name: 1, district_name: 1 }, { unique: true });
+DistrictSnapshotSchema.index({ district_name: 1, month: 1, fin_year: 1 });
 
 export default mongoose.model<IDistrictSnapshot>('DistrictSnapshot', DistrictSnapshotSchema);
